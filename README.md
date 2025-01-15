@@ -1,6 +1,6 @@
 # S1 动漫索引
 
-https://xxx 的源码。
+https://hexh250786313.github.io/stage9th/ 的源码。
 
 数据源来自 stage1st bss 论坛用户大佬，All credit goes to: https://bbs.saraba1st.com/2b/space-uid-465414.html
 
