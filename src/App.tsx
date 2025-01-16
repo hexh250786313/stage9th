@@ -66,6 +66,34 @@ const SortableHeader = styled.th<{ sortable?: boolean }>`
   }
 `;
 
+const InfoSection = styled.div`
+  font-size: 14px;
+  color: #666;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+`;
+
+const InfoLink = styled.a`
+  color: #4caf50;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+`;
+
 const ScrollToTopButton = styled.button<{
   visible: boolean;
 }>`
@@ -90,6 +118,13 @@ const ScrollToTopButton = styled.button<{
 
   &:hover {
     background-color: white;
+  }
+
+  @media (max-width: 768px) {
+    bottom: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
   }
 `;
 
@@ -120,19 +155,32 @@ const Container = styled.div`
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const FilterSection = styled.div`
-  margin-bottom: 20px;
   display: flex;
   gap: 20px;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
 `;
 
 const Select = styled.select`
   padding: 8px;
   border-radius: 4px;
   min-width: 120px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const Table = styled.table`
@@ -146,6 +194,20 @@ const Table = styled.table`
   }
   th {
     background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+
+    th,
+    td {
+      padding: 6px;
+      font-size: 14px;
+    }
   }
 `;
 
@@ -195,8 +257,11 @@ const TableRowWithAnimation = ({
 };
 
 const LoadingMessage = styled.div`
-  text-align: center;
   padding: 20px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ErrorMessage = styled.div`
@@ -207,6 +272,11 @@ const ErrorMessage = styled.div`
 
 const TabContainer = styled.div`
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    display: flex;
+    gap: 10px;
+  }
 `;
 
 const TabButton = styled.button<{ active: boolean }>`
@@ -221,10 +291,38 @@ const TabButton = styled.button<{ active: boolean }>`
   &:hover {
     background-color: ${(props) => (props.active ? "#45a049" : "#e0e0e0")};
   }
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+    flex: 1;
+    white-space: nowrap;
+    padding: 10px;
+  }
+`;
+
+// 为筛选器添加标签容器
+const FilterItem = styled.div`
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    label {
+      font-weight: bold;
+    }
+  }
 `;
 
 // fetcher 函数
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) =>
+  fetch(url)
+    .then((res) => res.json())
+    .then((res) => {
+      return {
+        posts: res.poll,
+        lastUpdated: res.last_updated,
+      };
+    });
 
 const VisualizationContainer = styled.div`
   display: flex;
@@ -271,9 +369,10 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
   const sortedPosts = [...posts].sort((a, b) => b.votes - a.votes).slice(0, 75); // 只取前30个
 
   // 计算字体大小范围
-  const firstPlaceFontSize = 64; // 排名第一使用更大字号
-  const maxFontSize = 48; // 第二名开始的最大字号
-  const minFontSize = 12; // 略微调整最小字号
+  const isMobile = window.innerWidth <= 768;
+  const firstPlaceFontSize = isMobile ? 48 : 64;
+  const maxFontSize = isMobile ? 32 : 48;
+  const minFontSize = isMobile ? 10 : 12;
 
   // 使用非线性计算使字体大小的变化更明显
   const calculateFontSize = (index: number) => {
@@ -335,10 +434,13 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
 
 function App() {
   const {
-    data: posts,
+    data: { posts, lastUpdated = 0 } = {},
     error,
     isLoading,
-  } = useSWR<Post[]>("https://stage9th-source.hexh.xyz", fetcher);
+  } = useSWR<{ posts: Post[]; lastUpdated: number }>(
+    "https://s1-vote-3rd.pages.dev/poll_results.json",
+    fetcher,
+  );
 
   const getAvailableYears = (posts: Post[] | undefined): number[] => {
     if (!posts || posts.length === 0) return [new Date().getFullYear()];
@@ -450,42 +552,77 @@ function App() {
 
   return (
     <Container>
-      <FilterSection>
-        <div>
-          <label>年份：</label>
-          <Select value={year} onChange={handleYearChange}>
-            <option value="">全部</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}年
-              </option>
-            ))}
-          </Select>
-        </div>
+      <FilterContainer>
+        <FilterSection>
+          <FilterItem>
+            <label>年份：</label>
+            <Select value={year} onChange={handleYearChange}>
+              <option value="">全部</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}年
+                </option>
+              ))}
+            </Select>
+          </FilterItem>
 
-        <div>
-          <label>季度：</label>
-          <Select value={quarter} onChange={handleQuarterChange}>
-            <option value="">全部</option>
-            <option value="Q1">一季度 (1-3月)</option>
-            <option value="Q2">二季度 (4-6月)</option>
-            <option value="Q3">三季度 (7-9月)</option>
-            <option value="Q4">四季度 (10-12月)</option>
-          </Select>
-        </div>
+          <FilterItem>
+            <label>季度：</label>
+            <Select value={quarter} onChange={handleQuarterChange}>
+              <option value="">全部</option>
+              <option value="Q1">一季度 (1-3月)</option>
+              <option value="Q2">二季度 (4-6月)</option>
+              <option value="Q3">三季度 (7-9月)</option>
+              <option value="Q4">四季度 (10-12月)</option>
+            </Select>
+          </FilterItem>
 
-        <div>
-          <label>月份：</label>
-          <Select value={month} onChange={handleMonthChange}>
-            <option value="">全部</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-              <option key={month} value={month.toString().padStart(2, "0")}>
-                {month}月
-              </option>
-            ))}
-          </Select>
-        </div>
-      </FilterSection>
+          <FilterItem>
+            <label>月份：</label>
+            <Select value={month} onChange={handleMonthChange}>
+              <option value="">全部</option>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                <option key={month} value={month.toString().padStart(2, "0")}>
+                  {month}月
+                </option>
+              ))}
+            </Select>
+          </FilterItem>
+        </FilterSection>
+        <InfoSection>
+          <div>
+            数据更新时间：{new Date(lastUpdated * 1000).toLocaleString()}
+          </div>
+          <div>
+            数据来源：
+            <InfoLink
+              href="https://s1-vote-3rd.pages.dev/poll_results.json"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              查看原始数据
+            </InfoLink>
+          </div>
+          <div>
+            本站数据基于&nbsp;
+            <InfoLink
+              href="https://bbs.saraba1st.com/2b/space-uid-465414.html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Junakr
+            </InfoLink>
+            &nbsp;开发的&nbsp;
+            <InfoLink
+              href="https://s1-vote-3rd.pages.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://s1-vote-3rd.pages.dev
+            </InfoLink>
+          </div>
+        </InfoSection>
+      </FilterContainer>
       <TabContainer>
         <TabButton
           active={activeTab === "table"}
