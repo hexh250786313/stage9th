@@ -387,8 +387,8 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
   };
 
   const processMovieTitle = (subject: string): string => {
-    // 先移除年份和类型标记
-    const titleOnly = subject.replace(/\[\d{4}\.\d+\](\[.*?\])?/, "").trim();
+    // 找到第二个 ] 的位置，移除之前的所有内容
+    const titleOnly = subject.replace(/^.*?\].*?\]/, "").trim();
 
     // 计算分隔符的数量
     const separatorCount = (titleOnly.match(/[/／]/g) || []).length;
@@ -521,7 +521,7 @@ function App() {
     if (!posts) return [];
 
     return posts.filter((post) => {
-      const match = post.subject.match(/\[(\d{4})\.(\d{1,2})\]/);
+      const match = post.subject.match(/\[(\d{4})[./](\d{1,2})\]/);
       if (!match) return false;
 
       const postYear = match[1];
