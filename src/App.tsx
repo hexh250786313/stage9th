@@ -1,9 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { css, keyframes } from 'styled-components';
-import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
 import './App.css';
 
 // 类型定义
+interface PaginationState {
+    page: number;
+    pageSize: number;
+    hasMore: boolean;
+}
+
 interface Post {
     id: number;
     subject: string;
@@ -263,7 +269,7 @@ const LoadingMessage = styled.div`
   align-items: center;
 `;
 
-const ErrorMessage = styled.div`
+const ErrorMessageContainer = styled.div`
   color: red;
   text-align: center;
   padding: 20px;
@@ -337,6 +343,21 @@ const VisualizationContainer = styled.div`
 const calculateColor = (score: number) => {
     const normalizedScore = Math.max(0, Math.min(1, (score + 2) / 4));
     return `rgb(${Math.round(255 * normalizedScore)}, 0, ${Math.round(255 * (1 - normalizedScore))})`;
+};
+
+// 延迟出现警告字样
+const ErrorMessage = ({ children }: { children: React.ReactNode }) => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setIsVisible(true);
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, []);
+
+    return <ErrorMessageContainer style={{ opacity: isVisible ? 1 : 0 }}>{children}</ErrorMessageContainer>;
 };
 
 const MovieTitle = styled.a<{ fontSize: number; score: number; index: number }>`
@@ -431,12 +452,34 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
     );
 };
 
+const SearchInput = styled.input`
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  width: 200px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
 function App() {
     const {
         data: { posts, lastUpdated = 0 } = {},
         error,
         isLoading,
-    } = useSWR<{ posts: Post[]; lastUpdated: number }>('https://s1-vote-3rd.pages.dev/poll_results.json', fetcher);
+    } = useSWRImmutable<{ posts: Post[]; lastUpdated: number }>(
+        'https://s1-vote-3rd.pages.dev/poll_results.json',
+        fetcher,
+    );
+    const [pagination, setPagination] = useState<PaginationState>({
+        page: 1,
+        pageSize: 100,
+        hasMore: true,
+    });
+    const [searchTerm, setSearchTerm] = useState<string>('');
+
+    const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
 
     const getAvailableYears = (posts: Post[] | undefined): number[] => {
         if (!posts || posts.length === 0) return [new Date().getFullYear()];
@@ -469,13 +512,58 @@ function App() {
         }));
     };
 
-    const getSortedPosts = (posts: Post[]) => {
+    const getSortedPosts = (posts: Post[], shouldPaginate: boolean = true) => {
         const filteredPosts = filterPosts(posts);
-        return [...filteredPosts].sort((a, b) => {
+        const sortedPosts = [...filteredPosts].sort((a, b) => {
             const multiplier = sort.direction === 'desc' ? -1 : 1;
             return (a[sort.field] - b[sort.field]) * multiplier;
         });
+
+        if (!shouldPaginate) return sortedPosts;
+
+        const start = 0;
+        const end = pagination.page * pagination.pageSize;
+        return sortedPosts.slice(start, end);
     };
+
+    // 添加滚动监听和加载更多功能;
+    useEffect(() => {
+        const handleScroll = () => {
+            if (!pagination.hasMore) return;
+
+            const scrollHeight = document.documentElement.scrollHeight;
+            const scrollTop = document.documentElement.scrollTop;
+            const clientHeight = document.documentElement.clientHeight;
+
+            if (scrollHeight - scrollTop - clientHeight < 100) {
+                setPagination((prev) => {
+                    const nextPage = prev.page + 1;
+                    const totalPosts = posts ? filterPosts(posts).length : 0;
+                    const hasMore = nextPage * prev.pageSize < totalPosts;
+
+                    return {
+                        ...prev,
+                        page: nextPage,
+                        hasMore,
+                    };
+                });
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [pagination.hasMore, posts]);
+
+    useEffect(() => {
+        if (posts) {
+            const sortedPosts = getSortedPosts(posts);
+            setDisplayedPosts(sortedPosts);
+            setPagination((prev) => ({
+                ...prev,
+                hasMore: sortedPosts.length < filterPosts(posts).length,
+            }));
+        }
+    }, [posts, sort, year, quarter, month, pagination.page, activeTab, searchTerm]);
 
     // 监听滚动事件
     useEffect(() => {
@@ -498,20 +586,31 @@ function App() {
 
     const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setYear(e.target.value);
+        setSearchTerm(''); // 清空搜索
+        setPagination({ page: 1, pageSize: 100, hasMore: true });
     };
 
     const handleQuarterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setQuarter(e.target.value);
         setMonth(''); // 清空月份
+        setSearchTerm(''); // 清空搜索
+        setPagination({ page: 1, pageSize: 100, hasMore: true });
     };
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setMonth(e.target.value);
         setQuarter(''); // 清空季度
+        setSearchTerm(''); // 清空搜索
+        setPagination({ page: 1, pageSize: 100, hasMore: true });
     };
 
     const filterPosts = (posts: Post[] | undefined) => {
         if (!posts) return [];
+
+        // 如果有搜索词，只按搜索词过滤
+        if (searchTerm.trim()) {
+            return posts.filter((post) => post.subject.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
 
         return posts.filter((post) => {
             const match = post.subject.match(/\[(\d{4})[./](\d{1,2})\]/);
@@ -536,6 +635,25 @@ function App() {
 
             return true;
         });
+    };
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.trim()) {
+            // 清空其他筛选条件
+            setYear('');
+            setQuarter('');
+            setMonth('');
+        }
+        // 重置分页
+        setPagination({
+            page: 1,
+            pageSize: 100,
+            hasMore: true,
+        });
+        // 清空已显示的帖子，强制重新计算
+        // setDisplayedPosts([]);
     };
 
     if (error) return <ErrorMessage>Failed to load data</ErrorMessage>;
@@ -580,6 +698,16 @@ function App() {
                             ))}
                         </Select>
                     </FilterItem>
+
+                    <FilterItem>
+                        <label>搜索标题：</label>
+                        <SearchInput
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            placeholder="输入标题关键词..."
+                        />
+                    </FilterItem>
                 </FilterSection>
                 <InfoSection>
                     <div>数据更新时间：{new Date(lastUpdated * 1000).toLocaleString()}</div>
@@ -610,7 +738,18 @@ function App() {
                 </InfoSection>
             </FilterContainer>
             <TabContainer>
-                <TabButton active={activeTab === 'table'} onClick={() => setActiveTab('table')}>
+                <TabButton
+                    active={activeTab === 'table'}
+                    onClick={() => {
+                        setActiveTab('table');
+                        // 先重置分页状态
+                        setPagination({
+                            page: 1,
+                            pageSize: 100,
+                            hasMore: true,
+                        });
+                    }}
+                >
                     表格视图
                 </TabButton>
                 <TabButton active={activeTab === 'other'} onClick={() => setActiveTab('other')}>
@@ -619,59 +758,63 @@ function App() {
             </TabContainer>
 
             {activeTab === 'table' ? (
-                rows.length ? (
-                    <Table>
-                        <thead>
-                            <tr>
-                                <th>序号</th>
-                                <th>标题</th>
-                                <SortableHeader
-                                    sortable
-                                    onClick={() => handleSort('votes')}
-                                    data-sort-direction={sort.field === 'votes' ? sort.direction : undefined}
-                                >
-                                    投票数
-                                </SortableHeader>
-                                <SortableHeader
-                                    sortable
-                                    onClick={() => handleSort('average_score')}
-                                    data-sort-direction={sort.field === 'average_score' ? sort.direction : undefined}
-                                >
-                                    平均得分
-                                </SortableHeader>
-                                <SortableHeader
-                                    sortable
-                                    onClick={() => handleSort('bayesian_average_score')}
-                                    data-sort-direction={
-                                        sort.field === 'bayesian_average_score' ? sort.direction : undefined
-                                    }
-                                >
-                                    贝叶斯平均得分
-                                </SortableHeader>
-                                <th>标准差</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.map((post, index) => (
-                                <TableRowWithAnimation key={post.id} index={index}>
-                                    <td>{index + 1}</td>
-                                    <td>
-                                        <MovieLink
-                                            href={generateThreadUrl(post.id)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {post.subject}
-                                        </MovieLink>
-                                    </td>
-                                    <td>{post.votes}</td>
-                                    <td>{post.average_score.toFixed(2)}</td>
-                                    <td>{post.bayesian_average_score.toFixed(2)}</td>
-                                    <td>{post.standard_deviation.toFixed(2)}</td>
-                                </TableRowWithAnimation>
-                            ))}
-                        </tbody>
-                    </Table>
+                displayedPosts.length ? (
+                    <>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>标题</th>
+                                    <SortableHeader
+                                        sortable
+                                        onClick={() => handleSort('votes')}
+                                        data-sort-direction={sort.field === 'votes' ? sort.direction : undefined}
+                                    >
+                                        投票数
+                                    </SortableHeader>
+                                    <SortableHeader
+                                        sortable
+                                        onClick={() => handleSort('average_score')}
+                                        data-sort-direction={
+                                            sort.field === 'average_score' ? sort.direction : undefined
+                                        }
+                                    >
+                                        平均得分
+                                    </SortableHeader>
+                                    <SortableHeader
+                                        sortable
+                                        onClick={() => handleSort('bayesian_average_score')}
+                                        data-sort-direction={
+                                            sort.field === 'bayesian_average_score' ? sort.direction : undefined
+                                        }
+                                    >
+                                        贝叶斯平均得分
+                                    </SortableHeader>
+                                    <th>标准差</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {displayedPosts.map((post, index) => (
+                                    <TableRowWithAnimation key={post.id} index={index}>
+                                        <td>{index + 1}</td>
+                                        <td>
+                                            <MovieLink
+                                                href={generateThreadUrl(post.id)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                {post.subject}
+                                            </MovieLink>
+                                        </td>
+                                        <td>{post.votes}</td>
+                                        <td>{post.average_score.toFixed(2)}</td>
+                                        <td>{post.bayesian_average_score.toFixed(2)}</td>
+                                        <td>{post.standard_deviation.toFixed(2)}</td>
+                                    </TableRowWithAnimation>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </>
                 ) : (
                     <ErrorMessage>No data available for the selected filters</ErrorMessage>
                 )
