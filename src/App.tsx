@@ -33,104 +33,104 @@ interface SortState {
 }
 
 const MovieLink = styled.a`
-  color: inherit;
-  text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 
-  &:hover {
-    text-decoration: underline;
-    color: #4caf50;
-  }
+    &:hover {
+        text-decoration: underline;
+        color: #4caf50;
+    }
 `;
 
 const generateThreadUrl = (id: number) => `https://bbs.saraba1st.com/2b/thread-${id}-1-1.html`;
 
 const SortableHeader = styled.th<{ sortable?: boolean }>`
-  cursor: ${(props) => (props.sortable ? 'pointer' : 'default')};
-  position: relative;
-  padding-right: ${(props) => (props.sortable ? '24px' : '8px')} !important;
+    cursor: ${(props) => (props.sortable ? 'pointer' : 'default')};
+    position: relative;
+    padding-right: ${(props) => (props.sortable ? '24px' : '8px')} !important;
 
-  &:hover {
-    background-color: ${(props) => (props.sortable ? '#e6e6e6' : '#f4f4f4')};
-  }
+    &:hover {
+        background-color: ${(props) => (props.sortable ? '#e6e6e6' : '#f4f4f4')};
+    }
 
-  &::after {
-    content: ${(props) => (props.sortable ? "'↕'" : 'none')};
-    position: absolute;
-    right: 8px;
-    opacity: 0.5;
-  }
+    &::after {
+        content: ${(props) => (props.sortable ? "'↕'" : 'none')};
+        position: absolute;
+        right: 8px;
+        opacity: 0.5;
+    }
 
-  &[data-sort-direction="asc"]::after {
-    content: "↑";
-    opacity: 1;
-  }
+    &[data-sort-direction='asc']::after {
+        content: '↑';
+        opacity: 1;
+    }
 
-  &[data-sort-direction="desc"]::after {
-    content: "↓";
-    opacity: 1;
-  }
+    &[data-sort-direction='desc']::after {
+        content: '↓';
+        opacity: 1;
+    }
 `;
 
 const InfoSection = styled.div`
-  font-size: 14px;
-  color: #666;
+    font-size: 14px;
+    color: #666;
 
-  @media (max-width: 768px) {
-    margin-left: 0;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-  }
+    @media (max-width: 768px) {
+        margin-left: 0;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
 `;
 
 const InfoLink = styled.a`
-  color: #4caf50;
-  text-decoration: none;
+    color: #4caf50;
+    text-decoration: none;
 
-  &:hover {
-    text-decoration: underline;
-  }
+    &:hover {
+        text-decoration: underline;
+    }
 `;
 
 const FilterContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
 `;
 
 const ScrollToTopButton = styled.button<{
     visible: boolean;
 }>`
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: grey;
-  color: rgba(0, 0, 0, 0.8);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    opacity 0.3s,
-    background-color 0.3s;
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  pointer-events: ${(props) => (props.visible ? 'auto' : 'none')};
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: grey;
+    color: rgba(0, 0, 0, 0.8);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        opacity 0.3s,
+        background-color 0.3s;
+    opacity: ${(props) => (props.visible ? 1 : 0)};
+    pointer-events: ${(props) => (props.visible ? 'auto' : 'none')};
 
-  &:hover {
-    background-color: white;
-  }
+    &:hover {
+        background-color: white;
+    }
 
-  @media (max-width: 768px) {
-    bottom: 20px;
-    right: 20px;
-    width: 36px;
-    height: 36px;
-  }
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+    }
 `;
 
 const fadeInUp = keyframes`
@@ -157,80 +157,75 @@ const fadeIn = keyframes`
 
 // 样式组件定义
 const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 
-  @media (max-width: 768px) {
-    padding: 10px;
-  }
+    @media (max-width: 768px) {
+        padding: 10px;
+    }
 `;
 
 const FilterSection = styled.div`
-  display: flex;
-  gap: 20px;
-  align-items: center;
+    display: flex;
+    gap: 20px;
+    align-items: center;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
 `;
 
 const Select = styled.select`
-  padding: 8px;
-  border-radius: 4px;
-  min-width: 120px;
+    padding: 8px;
+    border-radius: 4px;
+    min-width: 120px;
 
-  @media (max-width: 768px) {
-    width: 100%;
-  }
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 `;
 
 const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  th {
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-  }
-
-  @media (max-width: 768px) {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-
+    width: 100%;
+    border-collapse: collapse;
     th,
     td {
-      padding: 6px;
-      font-size: 14px;
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
     }
-  }
+    th {
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+
+        th,
+        td {
+            padding: 6px;
+            font-size: 14px;
+        }
+    }
 `;
 
 const TableRow = styled.tr<{ visible: boolean }>`
-  opacity: 0;
-  ${(props) =>
-      props.visible &&
-      css`
-      animation: ${fadeIn} 0.5s ease forwards;
-    `}
+    opacity: 0;
+    ${(props) =>
+        props.visible &&
+        css`
+            animation: ${fadeIn} 0.5s ease forwards;
+        `}
 `;
 
-const TableRowWithAnimation = ({
-    children,
-}: {
-    children: React.ReactNode;
-    index: number;
-}) => {
+const TableRowWithAnimation = ({ children }: { children: React.ReactNode; index: number }) => {
     const [isVisible, setIsVisible] = useState(false);
     const rowRef = useRef(null);
 
@@ -262,60 +257,60 @@ const TableRowWithAnimation = ({
 };
 
 const LoadingMessage = styled.div`
-  padding: 20px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;
 
 const ErrorMessageContainer = styled.div`
-  color: red;
-  text-align: center;
-  padding: 20px;
+    color: red;
+    text-align: center;
+    padding: 20px;
 `;
 
 const TabContainer = styled.div`
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 
-  @media (max-width: 768px) {
-    display: flex;
-    gap: 10px;
-  }
+    @media (max-width: 768px) {
+        display: flex;
+        gap: 10px;
+    }
 `;
 
 const TabButton = styled.button<{ active: boolean }>`
-  padding: 8px 16px;
-  margin-right: 10px;
-  border: none;
-  background-color: ${(props) => (props.active ? '#4CAF50' : '#f0f0f0')};
-  color: ${(props) => (props.active ? 'white' : 'black')};
-  cursor: pointer;
-  border-radius: 4px;
+    padding: 8px 16px;
+    margin-right: 10px;
+    border: none;
+    background-color: ${(props) => (props.active ? '#4CAF50' : '#f0f0f0')};
+    color: ${(props) => (props.active ? 'white' : 'black')};
+    cursor: pointer;
+    border-radius: 4px;
 
-  &:hover {
-    background-color: ${(props) => (props.active ? '#45a049' : '#e0e0e0')};
-  }
+    &:hover {
+        background-color: ${(props) => (props.active ? '#45a049' : '#e0e0e0')};
+    }
 
-  @media (max-width: 768px) {
-    margin-right: 0;
-    flex: 1;
-    white-space: nowrap;
-    padding: 10px;
-  }
+    @media (max-width: 768px) {
+        margin-right: 0;
+        flex: 1;
+        white-space: nowrap;
+        padding: 10px;
+    }
 `;
 
 // 为筛选器添加标签容器
 const FilterItem = styled.div`
-  @media (max-width: 768px) {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
 
-    label {
-      font-weight: bold;
+        label {
+            font-weight: bold;
+        }
     }
-  }
 `;
 
 // fetcher 函数
@@ -330,14 +325,14 @@ const fetcher = (url: string) =>
         });
 
 const VisualizationContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-  padding: 20px;
-  gap: 16px;
-  will-change: contents;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 20px;
+    gap: 16px;
+    will-change: contents;
 `;
 
 const calculateColor = (score: number) => {
@@ -361,27 +356,27 @@ const ErrorMessage = ({ children }: { children: React.ReactNode }) => {
 };
 
 const MovieTitle = styled.a<{ fontSize: number; score: number; index: number }>`
-  font-size: ${(props) => props.fontSize}px;
-  color: ${(props) => calculateColor(props.score)};
-  text-align: center;
-  cursor: pointer;
-  transition: scale 0.2s;
-  animation: ${fadeInUp} 0.5s ease forwards;
-  animation-delay: ${(props) => props.index * 0.03}s;
-  opacity: 0;
-  text-decoration: none;
-
-  &:hover {
-    scale: 1.1;
-    text-decoration: underline;
+    font-size: ${(props) => props.fontSize}px;
     color: ${(props) => calculateColor(props.score)};
-  }
+    text-align: center;
+    cursor: pointer;
+    transition: scale 0.2s;
+    animation: ${fadeInUp} 0.5s ease forwards;
+    animation-delay: ${(props) => props.index * 0.03}s;
+    opacity: 0;
+    text-decoration: none;
 
-  &:link,
-  &:visited,
-  &:active {
-    color: ${(props) => calculateColor(props.score)};
-  }
+    &:hover {
+        scale: 1.1;
+        text-decoration: underline;
+        color: ${(props) => calculateColor(props.score)};
+    }
+
+    &:link,
+    &:visited,
+    &:active {
+        color: ${(props) => calculateColor(props.score)};
+    }
 `;
 
 const VisualizationView = ({ posts }: { posts: Post[] }) => {
@@ -453,14 +448,14 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
 };
 
 const SearchInput = styled.input`
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  width: 200px;
-  
-  @media (max-width: 768px) {
-    width: 100%;
-  }
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 200px;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 `;
 
 function App() {

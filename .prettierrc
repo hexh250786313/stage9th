@@ -1,0 +1,18 @@
+{
+    "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-packagejson"],
+    "printWidth": 120,
+    "proseWrap": "never",
+    "singleQuote": true,
+    "trailingComma": "all",
+    "tabWidth": 4,
+    "semi": true,
+    "overrides": [
+        {
+            "files": "*.md",
+            "options": {
+                "proseWrap": "preserve",
+                "tabWidth": 2
+            }
+        }
+    ]
+}
