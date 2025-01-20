@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc -b && vite build",
-        "dev": "vite --host",
+        "dev": "vite",
         "prepare": "husky"
     },
     "dependencies": {

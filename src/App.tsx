@@ -1,7 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled, { css, keyframes } from 'styled-components';
 import useSWRImmutable from 'swr/immutable';
-import './App.css';
+import { Container } from './styles/components/Container';
+import { ErrorMessageContainer } from './styles/components/ErrorMessageContainer';
+import { FilterContainer } from './styles/components/FilterContainer';
+import { FilterItem } from './styles/components/FilterItem';
+import { FilterSection } from './styles/components/FilterSection';
+import { InfoLink } from './styles/components/InfoLink';
+import { InfoSection } from './styles/components/InfoSection';
+import { LoadingMessage } from './styles/components/LoadingMessage';
+import { MovieLink } from './styles/components/MovieLink';
+import { MovieTitle } from './styles/components/MovieTitle';
+import { ScrollToTopButton } from './styles/components/ScrollToTopButton';
+import { SearchInput } from './styles/components/SearchInput';
+import { Select } from './styles/components/Select';
+import { SortableHeader } from './styles/components/SortableHeader';
+import { TabButton } from './styles/components/TabButton';
+import { TabContainer } from './styles/components/TabContainer';
+import { Table } from './styles/components/Table';
+import { TableRow } from './styles/components/TableRow';
+import { VisualizationContainer } from './styles/components/VisualizationContainer';
 
 // 类型定义
 interface PaginationState {
@@ -32,198 +49,7 @@ interface SortState {
     direction: SortDirection;
 }
 
-const MovieLink = styled.a`
-    color: inherit;
-    text-decoration: none;
-
-    &:hover {
-        text-decoration: underline;
-        color: #4caf50;
-    }
-`;
-
 const generateThreadUrl = (id: number) => `https://bbs.saraba1st.com/2b/thread-${id}-1-1.html`;
-
-const SortableHeader = styled.th<{ sortable?: boolean }>`
-    cursor: ${(props) => (props.sortable ? 'pointer' : 'default')};
-    position: relative;
-    padding-right: ${(props) => (props.sortable ? '24px' : '8px')} !important;
-
-    &:hover {
-        background-color: ${(props) => (props.sortable ? '#e6e6e6' : '#f4f4f4')};
-    }
-
-    &::after {
-        content: ${(props) => (props.sortable ? "'↕'" : 'none')};
-        position: absolute;
-        right: 8px;
-        opacity: 0.5;
-    }
-
-    &[data-sort-direction='asc']::after {
-        content: '↑';
-        opacity: 1;
-    }
-
-    &[data-sort-direction='desc']::after {
-        content: '↓';
-        opacity: 1;
-    }
-`;
-
-const InfoSection = styled.div`
-    font-size: 14px;
-    color: #666;
-
-    @media (max-width: 768px) {
-        margin-left: 0;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #eee;
-    }
-`;
-
-const InfoLink = styled.a`
-    color: #4caf50;
-    text-decoration: none;
-
-    &:hover {
-        text-decoration: underline;
-    }
-`;
-
-const FilterContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 20px;
-`;
-
-const ScrollToTopButton = styled.button<{
-    visible: boolean;
-}>`
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: grey;
-    color: rgba(0, 0, 0, 0.8);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-        opacity 0.3s,
-        background-color 0.3s;
-    opacity: ${(props) => (props.visible ? 1 : 0)};
-    pointer-events: ${(props) => (props.visible ? 'auto' : 'none')};
-
-    &:hover {
-        background-color: white;
-    }
-
-    @media (max-width: 768px) {
-        bottom: 20px;
-        right: 20px;
-        width: 36px;
-        height: 36px;
-    }
-`;
-
-const fadeInUp = keyframes`
-  from {
-    opacity: 0;
-    translate: 0 10px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-`;
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-// 样式组件定义
-const Container = styled.div`
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-
-    @media (max-width: 768px) {
-        padding: 10px;
-    }
-`;
-
-const FilterSection = styled.div`
-    display: flex;
-    gap: 20px;
-    align-items: center;
-
-    @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-`;
-
-const Select = styled.select`
-    padding: 8px;
-    border-radius: 4px;
-    min-width: 120px;
-
-    @media (max-width: 768px) {
-        width: 100%;
-    }
-`;
-
-const Table = styled.table`
-    width: 100%;
-    border-collapse: collapse;
-    th,
-    td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-    th {
-        background-color: rgba(0, 0, 0, 0.6);
-        color: white;
-    }
-
-    @media (max-width: 768px) {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-
-        th,
-        td {
-            padding: 6px;
-            font-size: 14px;
-        }
-    }
-`;
-
-const TableRow = styled.tr<{ visible: boolean }>`
-    opacity: 0;
-    ${(props) =>
-        props.visible &&
-        css`
-            animation: ${fadeIn} 0.5s ease forwards;
-        `}
-`;
 
 const TableRowWithAnimation = ({ children }: { children: React.ReactNode; index: number }) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -256,63 +82,6 @@ const TableRowWithAnimation = ({ children }: { children: React.ReactNode; index:
     );
 };
 
-const LoadingMessage = styled.div`
-    padding: 20px;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`;
-
-const ErrorMessageContainer = styled.div`
-    color: red;
-    text-align: center;
-    padding: 20px;
-`;
-
-const TabContainer = styled.div`
-    margin-bottom: 20px;
-
-    @media (max-width: 768px) {
-        display: flex;
-        gap: 10px;
-    }
-`;
-
-const TabButton = styled.button<{ active: boolean }>`
-    padding: 8px 16px;
-    margin-right: 10px;
-    border: none;
-    background-color: ${(props) => (props.active ? '#4CAF50' : '#f0f0f0')};
-    color: ${(props) => (props.active ? 'white' : 'black')};
-    cursor: pointer;
-    border-radius: 4px;
-
-    &:hover {
-        background-color: ${(props) => (props.active ? '#45a049' : '#e0e0e0')};
-    }
-
-    @media (max-width: 768px) {
-        margin-right: 0;
-        flex: 1;
-        white-space: nowrap;
-        padding: 10px;
-    }
-`;
-
-// 为筛选器添加标签容器
-const FilterItem = styled.div`
-    @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-
-        label {
-            font-weight: bold;
-        }
-    }
-`;
-
 // fetcher 函数
 const fetcher = (url: string) =>
     fetch(url)
@@ -323,22 +92,6 @@ const fetcher = (url: string) =>
                 lastUpdated: res.last_updated,
             };
         });
-
-const VisualizationContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-    padding: 20px;
-    gap: 16px;
-    will-change: contents;
-`;
-
-const calculateColor = (score: number) => {
-    const normalizedScore = Math.max(0, Math.min(1, (score + 2) / 4));
-    return `rgb(${Math.round(255 * normalizedScore)}, 0, ${Math.round(255 * (1 - normalizedScore))})`;
-};
 
 // 延迟出现警告字样
 const ErrorMessage = ({ children }: { children: React.ReactNode }) => {
@@ -354,30 +107,6 @@ const ErrorMessage = ({ children }: { children: React.ReactNode }) => {
 
     return <ErrorMessageContainer style={{ opacity: isVisible ? 1 : 0 }}>{children}</ErrorMessageContainer>;
 };
-
-const MovieTitle = styled.a<{ fontSize: number; score: number; index: number }>`
-    font-size: ${(props) => props.fontSize}px;
-    color: ${(props) => calculateColor(props.score)};
-    text-align: center;
-    cursor: pointer;
-    transition: scale 0.2s;
-    animation: ${fadeInUp} 0.5s ease forwards;
-    animation-delay: ${(props) => props.index * 0.03}s;
-    opacity: 0;
-    text-decoration: none;
-
-    &:hover {
-        scale: 1.1;
-        text-decoration: underline;
-        color: ${(props) => calculateColor(props.score)};
-    }
-
-    &:link,
-    &:visited,
-    &:active {
-        color: ${(props) => calculateColor(props.score)};
-    }
-`;
 
 const VisualizationView = ({ posts }: { posts: Post[] }) => {
     // 先按投票人数排序
@@ -447,17 +176,6 @@ const VisualizationView = ({ posts }: { posts: Post[] }) => {
     );
 };
 
-const SearchInput = styled.input`
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    width: 200px;
-
-    @media (max-width: 768px) {
-        width: 100%;
-    }
-`;
-
 function App() {
     const {
         data: { posts, lastUpdated = 0 } = {},
@@ -473,6 +191,32 @@ function App() {
         hasMore: true,
     });
     const [searchTerm, setSearchTerm] = useState<string>('');
+
+    useEffect(() => {
+        if (isLoading) {
+            // 在浏览器空闲时才加载字体
+            const loadFont = () => {
+                // 检查是否已经加载过这个 CSS
+                const existingLink = document.querySelector(
+                    'link[href="https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css"]',
+                );
+
+                if (!existingLink) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = 'https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css';
+                    document.head.appendChild(link);
+                }
+            };
+
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(loadFont);
+            } else {
+                // 降级方案
+                setTimeout(loadFont, 1000);
+            }
+        }
+    }, [isLoading]);
 
     const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
 
@@ -656,172 +400,174 @@ function App() {
     const rows = getSortedPosts(posts || []);
 
     return (
-        <Container>
-            <FilterContainer>
-                <FilterSection>
-                    <FilterItem>
-                        <label>年份：</label>
-                        <Select value={year} onChange={handleYearChange}>
-                            <option value="">全部</option>
-                            {years.map((year) => (
-                                <option key={year} value={year}>
-                                    {year}年
-                                </option>
-                            ))}
-                        </Select>
-                    </FilterItem>
-
-                    <FilterItem>
-                        <label>季度：</label>
-                        <Select value={quarter} onChange={handleQuarterChange}>
-                            <option value="">全部</option>
-                            <option value="Q1">一季度 (1-3月)</option>
-                            <option value="Q2">二季度 (4-6月)</option>
-                            <option value="Q3">三季度 (7-9月)</option>
-                            <option value="Q4">四季度 (10-12月)</option>
-                        </Select>
-                    </FilterItem>
-
-                    <FilterItem>
-                        <label>月份：</label>
-                        <Select value={month} onChange={handleMonthChange}>
-                            <option value="">全部</option>
-                            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                                <option key={month} value={month.toString().padStart(2, '0')}>
-                                    {month}月
-                                </option>
-                            ))}
-                        </Select>
-                    </FilterItem>
-
-                    <FilterItem>
-                        <label>搜索标题：</label>
-                        <SearchInput
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleSearch}
-                            placeholder="输入标题关键词..."
-                        />
-                    </FilterItem>
-                </FilterSection>
-                <InfoSection>
-                    <div>数据更新时间：{new Date(lastUpdated * 1000).toLocaleString()}</div>
-                    <div>
-                        数据来源：
-                        <InfoLink
-                            href="https://s1-vote-3rd.pages.dev/poll_results.json"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            查看原始数据
-                        </InfoLink>
-                    </div>
-                    <div>
-                        本站数据基于&nbsp;
-                        <InfoLink
-                            href="https://bbs.saraba1st.com/2b/space-uid-465414.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Junakr
-                        </InfoLink>
-                        &nbsp;开发的&nbsp;
-                        <InfoLink href="https://s1-vote-3rd.pages.dev" target="_blank" rel="noopener noreferrer">
-                            https://s1-vote-3rd.pages.dev
-                        </InfoLink>
-                    </div>
-                </InfoSection>
-            </FilterContainer>
-            <TabContainer>
-                <TabButton
-                    active={activeTab === 'table'}
-                    onClick={() => {
-                        setActiveTab('table');
-                        // 先重置分页状态
-                        setPagination({
-                            page: 1,
-                            pageSize: 100,
-                            hasMore: true,
-                        });
-                    }}
-                >
-                    表格视图
-                </TabButton>
-                <TabButton active={activeTab === 'other'} onClick={() => setActiveTab('other')}>
-                    可视化
-                </TabButton>
-            </TabContainer>
-
-            {activeTab === 'table' ? (
-                displayedPosts.length ? (
-                    <>
-                        <Table>
-                            <thead>
-                                <tr>
-                                    <th>序号</th>
-                                    <th>标题</th>
-                                    <SortableHeader
-                                        sortable
-                                        onClick={() => handleSort('votes')}
-                                        data-sort-direction={sort.field === 'votes' ? sort.direction : undefined}
-                                    >
-                                        投票数
-                                    </SortableHeader>
-                                    <SortableHeader
-                                        sortable
-                                        onClick={() => handleSort('average_score')}
-                                        data-sort-direction={
-                                            sort.field === 'average_score' ? sort.direction : undefined
-                                        }
-                                    >
-                                        平均得分
-                                    </SortableHeader>
-                                    <SortableHeader
-                                        sortable
-                                        onClick={() => handleSort('bayesian_average_score')}
-                                        data-sort-direction={
-                                            sort.field === 'bayesian_average_score' ? sort.direction : undefined
-                                        }
-                                    >
-                                        贝叶斯平均得分
-                                    </SortableHeader>
-                                    <th>标准差</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {displayedPosts.map((post, index) => (
-                                    <TableRowWithAnimation key={post.id} index={index}>
-                                        <td>{index + 1}</td>
-                                        <td>
-                                            <MovieLink
-                                                href={generateThreadUrl(post.id)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                {post.subject}
-                                            </MovieLink>
-                                        </td>
-                                        <td>{post.votes}</td>
-                                        <td>{post.average_score.toFixed(2)}</td>
-                                        <td>{post.bayesian_average_score.toFixed(2)}</td>
-                                        <td>{post.standard_deviation.toFixed(2)}</td>
-                                    </TableRowWithAnimation>
+        <>
+            <Container>
+                <FilterContainer>
+                    <FilterSection>
+                        <FilterItem>
+                            <label>年份：</label>
+                            <Select value={year} onChange={handleYearChange}>
+                                <option value="">全部</option>
+                                {years.map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}年
+                                    </option>
                                 ))}
-                            </tbody>
-                        </Table>
-                    </>
+                            </Select>
+                        </FilterItem>
+
+                        <FilterItem>
+                            <label>季度：</label>
+                            <Select value={quarter} onChange={handleQuarterChange}>
+                                <option value="">全部</option>
+                                <option value="Q1">一季度 (1-3月)</option>
+                                <option value="Q2">二季度 (4-6月)</option>
+                                <option value="Q3">三季度 (7-9月)</option>
+                                <option value="Q4">四季度 (10-12月)</option>
+                            </Select>
+                        </FilterItem>
+
+                        <FilterItem>
+                            <label>月份：</label>
+                            <Select value={month} onChange={handleMonthChange}>
+                                <option value="">全部</option>
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                                    <option key={month} value={month.toString().padStart(2, '0')}>
+                                        {month}月
+                                    </option>
+                                ))}
+                            </Select>
+                        </FilterItem>
+
+                        <FilterItem>
+                            <label>搜索标题：</label>
+                            <SearchInput
+                                type="text"
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                placeholder="输入标题关键词..."
+                            />
+                        </FilterItem>
+                    </FilterSection>
+                    <InfoSection>
+                        <div>数据更新时间：{new Date(lastUpdated * 1000).toLocaleString()}</div>
+                        <div>
+                            数据来源：
+                            <InfoLink
+                                href="https://s1-vote-3rd.pages.dev/poll_results.json"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                查看原始数据
+                            </InfoLink>
+                        </div>
+                        <div>
+                            本站数据基于&nbsp;
+                            <InfoLink
+                                href="https://bbs.saraba1st.com/2b/space-uid-465414.html"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Junakr
+                            </InfoLink>
+                            &nbsp;开发的&nbsp;
+                            <InfoLink href="https://s1-vote-3rd.pages.dev" target="_blank" rel="noopener noreferrer">
+                                https://s1-vote-3rd.pages.dev
+                            </InfoLink>
+                        </div>
+                    </InfoSection>
+                </FilterContainer>
+                <TabContainer>
+                    <TabButton
+                        active={activeTab === 'table'}
+                        onClick={() => {
+                            setActiveTab('table');
+                            // 先重置分页状态
+                            setPagination({
+                                page: 1,
+                                pageSize: 100,
+                                hasMore: true,
+                            });
+                        }}
+                    >
+                        表格视图
+                    </TabButton>
+                    <TabButton active={activeTab === 'other'} onClick={() => setActiveTab('other')}>
+                        可视化
+                    </TabButton>
+                </TabContainer>
+
+                {activeTab === 'table' ? (
+                    displayedPosts.length ? (
+                        <>
+                            <Table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>标题</th>
+                                        <SortableHeader
+                                            sortable
+                                            onClick={() => handleSort('bayesian_average_score')}
+                                            data-sort-direction={
+                                                sort.field === 'bayesian_average_score' ? sort.direction : undefined
+                                            }
+                                        >
+                                            贝叶斯平均得分
+                                        </SortableHeader>
+                                        <SortableHeader
+                                            sortable
+                                            onClick={() => handleSort('votes')}
+                                            data-sort-direction={sort.field === 'votes' ? sort.direction : undefined}
+                                        >
+                                            投票数
+                                        </SortableHeader>
+                                        <SortableHeader
+                                            sortable
+                                            onClick={() => handleSort('average_score')}
+                                            data-sort-direction={
+                                                sort.field === 'average_score' ? sort.direction : undefined
+                                            }
+                                        >
+                                            平均得分
+                                        </SortableHeader>
+                                        <th>标准差</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {displayedPosts.map((post, index) => (
+                                        <TableRowWithAnimation key={post.id} index={index}>
+                                            <td>{index + 1}</td>
+                                            <td>
+                                                <MovieLink
+                                                    href={generateThreadUrl(post.id)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {post.subject}
+                                                </MovieLink>
+                                            </td>
+                                            <td>{post.bayesian_average_score.toFixed(2)}</td>
+                                            <td>{post.votes}</td>
+                                            <td>{post.average_score.toFixed(2)}</td>
+                                            <td>{post.standard_deviation.toFixed(2)}</td>
+                                        </TableRowWithAnimation>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </>
+                    ) : (
+                        <ErrorMessage>No data available for the selected filters</ErrorMessage>
+                    )
+                ) : rows?.length ? (
+                    <VisualizationView posts={filterPosts(posts) || []} />
                 ) : (
                     <ErrorMessage>No data available for the selected filters</ErrorMessage>
-                )
-            ) : rows?.length ? (
-                <VisualizationView posts={filterPosts(posts) || []} />
-            ) : (
-                <ErrorMessage>No data available for the selected filters</ErrorMessage>
-            )}
-            <ScrollToTopButton visible={showScrollTop} onClick={scrollToTop} aria-label="返回顶部">
-                ↑
-            </ScrollToTopButton>
-        </Container>
+                )}
+                <ScrollToTopButton visible={showScrollTop} onClick={scrollToTop} aria-label="返回顶部">
+                    ↑
+                </ScrollToTopButton>
+            </Container>
+        </>
     );
 }
 
