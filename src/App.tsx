@@ -49,7 +49,7 @@ interface SortState {
     direction: SortDirection;
 }
 
-const generateThreadUrl = (id: number) => `https://bbs.saraba1st.com/2b/thread-${id}-1-1.html`;
+const generateThreadUrl = (id: number) => `https://stage1st.com/2b/thread-${id}-1-1.html`;
 
 const TableRowWithAnimation = ({ children }: { children: React.ReactNode; index: number }) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -464,7 +464,7 @@ function App() {
                         <div>
                             本站数据基于&nbsp;
                             <InfoLink
-                                href="https://bbs.saraba1st.com/2b/space-uid-465414.html"
+                                href="https://stage1st.com/2b/space-uid-465414.html"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
